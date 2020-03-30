@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+        <head>
+                <meta charset="utf-8" />
+                <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+        </head>
+
+        <body>
+
+                <p> chart should be below</p>
+                <canvas id="chart" width="600" height="400"></canvas>
+
+
+                  <script type="text/javascript">
+
+                    // bar chart data
+                  var data = {{ values|safe }};
+
+                    var barData = {  
+                      labels : ["0", "0.2", "0.4", "0.6", "0.8", "1.0",],
+                      datasets : [{
+                        fillColor: "rgba(151,187,205,0.2)",
+                        strokeColor: "rgba(151,187,205,1)",
+                        pointColor: "rgba(151,187,205,1)",
+                        barPercentage:1.0,
+                        data
+                        }
+                      ]
+                      }
+                    
+                    
+
+                   // get bar chart canvas
+                   var mychart = document.getElementById("chart").getContext("2d");
+
+                  steps = 5
+                  max = 25
+              
+                   // draw bar chart
+                   new Chart(mychart).Bar(barData, {
+                     scaleOverride: true,
+                     scaleSteps: steps,
+                     scaleStepWidth: Math.ceil(max / steps),
+                     scaleStartValue: 0,
+                     scaleShowVerticalLines: false,
+                     scaleShowGridLines : false,
+                     barShowStroke : true,
+                     scaleShowLabels: true,
+                     scaleOverride : true,
+                     }
+                   );
+
+                  </script>
+              </body>
+        
+</html>
+  
+ 
