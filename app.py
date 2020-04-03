@@ -9,16 +9,11 @@ import sys
 import json
 import requests
 from urllib.parse import quote
-import plotly.express as px
 import numpy as np
 import pandas as pd
-import psutil
 import seaborn as sns
-import matplotlib.pyplot as plt
 from scipy.stats import binned_statistic
 
-
-plt.switch_backend('Agg') #backend to a non-interactive to prevent crash
 
 AUTHORIZATION_HEADER = ""
 #  Client Keys
@@ -50,8 +45,52 @@ def auth():
     auth_url = "{}/?{}".format("https://accounts.spotify.com/authorize", url_args)
     return redirect(auth_url)
 
+# NEW COMMENT @app.route("/get_top_tracks", methods=['GET','POST'])
+def get_top_tracks(time_range):
 
-@app.route("/callback/q")
+    top_track_endpoint  = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range={}".format(time_range)
+    profile_response = requests.get(top_track_endpoint, headers=AUTHORIZATION_HEADER)
+    profile_data = json.loads(profile_response.text)
+  
+    tracks = []
+
+    display_arr = [profile_data][0]['items']
+    for each_track in display_arr:
+        tracks.append([each_track][0]['id'])
+    print("inside get top tracks")
+
+    return tracks #return the id of the top 50 tracks
+
+def get_feature_data(track_ids):
+    accousticness = []
+    energy = []
+    tempo = []
+    valence = []
+
+    for track in track_ids:
+        feat_endpoint  = "https://api.spotify.com/v1/audio-features/{}".format(track)
+        song_response = requests.get(feat_endpoint, headers=AUTHORIZATION_HEADER)
+        song_data = json.loads(song_response.text)
+        song_ac = song_data['acousticness']
+        accousticness.append(song_ac)
+        song_en = song_data['energy']
+        energy.append(song_en)
+        song_te = song_data['tempo']
+        tempo.append(song_te)
+        song_va = song_data['valence']
+        valence.append(song_va)
+
+    # bin data to create hisogram
+    ac_bins = binned_statistic(accousticness, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+    en_bins = binned_statistic(energy, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+    te_bins = binned_statistic(tempo, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+    va_bins = binned_statistic(valence, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+
+    print((ac_bins.astype(int)).tolist())
+    return ((ac_bins.astype(int)).tolist(), (en_bins.astype(int)).tolist(), (te_bins.astype(int)).tolist(), (va_bins.astype(int)).tolist())
+
+
+@app.route("/callback/q", methods=['GET','POST']) 
 def callback():
     # Auth Step 4: Requests refresh and access tokens
     auth_token = request.args['code']
@@ -75,77 +114,16 @@ def callback():
     global AUTHORIZATION_HEADER    # Needed to modify global copy of globvar
     AUTHORIZATION_HEADER  = {"Authorization": "Bearer {}".format(access_token)}
 
-    return render_template("home.html")
-
-def get_data(track_ids):
-    accousticness = []
-
-    for track in track_ids:
-        top_track_endpoint  = "https://api.spotify.com/v1/audio-features/{}".format(track)
-        song_response = requests.get(top_track_endpoint, headers=AUTHORIZATION_HEADER)
-        song_data = json.loads(song_response.text)
-        song_accousticness = song_data['danceability']
-        accousticness.append(song_accousticness)
-    
-    return accousticness
+    short_top = get_top_tracks("short_term") #ids of top 50 tracks
+    med_top = get_top_tracks("medium_term")
 
 
+    short_ac, short_en, short_te, short_va= get_feature_data(short_top)
+    med_ac, med_en, med_te, med_va= get_feature_data(med_top)
+ 
 
-@app.route("/get_top_tracks", methods=['GET','POST'])
-def get_top_tracks():
-    num_tracks = request.form['num_songs']
-
-    # Get profile data
-    #user_profile_api_endpoint = "{}/me".format("https://api.spotify.com/v1")
-    top_track_endpoint  = "https://api.spotify.com/v1/me/top/tracks?limit={}&time_range=short_term".format(num_tracks)
-    profile_response = requests.get(top_track_endpoint, headers=AUTHORIZATION_HEADER)
-    profile_data = json.loads(profile_response.text)
-
-    # Get user playlist data
-    #playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
-    #playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
-    #playlist_data = json.loads(playlists_response.text)
-
-    # Combine profile and playlist data to display
-  
-    tracks = []
-
-    display_arr = [profile_data][0]['items']
-    #display_arr = [profile_data][0]
-    for each_track in display_arr:
-        tracks.append([each_track][0]['id'])
-
-    all_accousticness = get_data(tracks)
-
-    bin_means = binned_statistic(all_accousticness, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
-
-    means = (bin_means.astype(int)).tolist()
-
-
-    return render_template("auth_return.html", values=json.dumps(means))
+    return render_template("auth_return.html", short_ac=json.dumps(short_ac), med_ac=json.dumps(med_ac), short_en=json.dumps(short_en), med_en=json.dumps(med_en))
 
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
-
-'''
-    arr_t = np.array(all_accousticness).T
-
-    sns.set()
-    sns.distplot(arr_t, bins=20, hist=True, kde=False, axlabel='Accousticness')
-    plt.savefig('./static/accoustic.png')
-
-@app.route("/")
-def index():
-    return render_template('index.html')
-
-@app.route("/")
-def index():
-    return render_template('index.html')
-
-@app.route("/callback")
-def callback():
-    print("2nd page")
-    return("nothing")
-
-'''

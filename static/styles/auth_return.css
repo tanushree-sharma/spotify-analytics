@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css?family=Bebas+Neue|Roboto+Condensed|Open+Sans&display=swap");
+
+
+body {
+  font-family: 'Roboto Condensed', sans-serif;
+  padding:0px;
+  margin-left:10vw;
+  margin-right:10vw;
+  max-width:100vw;
+  overflow-x:hidden;
+  scroll-behavior: smooth;
+}
+
+h1{
+  font-family: 'Bebas Neue', cursive;
+  font-size: 60px;
+  text-align: center;
+  letter-spacing: 2px;
+
+}
+p{
+  font-family: 'Open Sans';
+  font-size: 2vh;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+.slider{
+  color:white;
+
+}
+#slide{
+  position: relative;
+}
+
+i {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.aspectwrapper {
+  width: 100%;
+  position: relative;
+}
+.aspectspacer {
+  width: 100%; /* let the enlarged image height push .aspectwrapper's bottom edge */
+}
+
+.content{
+  position: absolute;
+  top: 0; bottom: 0; right: 0; left: 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+}
+#feat{
+  margin-bottom: 30px;
+  margin-top: 30px;
+
+}
+.left{
+  width: 20vw;
+  float:left;
+  padding-left: 8%;
+  padding-top: 10%;
+  letter-spacing: 1px;
+  font-size: 1.25vw;
+
+
+}
+.right{
+  width:40vw;
+  float:left;
+  padding-bottom: 5%;
+  padding-left: 8%;
+
+}

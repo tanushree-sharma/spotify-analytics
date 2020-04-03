@@ -1,58 +1,122 @@
 <!DOCTYPE html>
 <html>
-        <head>
-                <meta charset="utf-8" />
-                <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
-        </head>
+  <head>
+    <meta charset="utf-8" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css"href="{{ url_for('static',filename='styles/auth_return.css') }}">
 
-        <body>
+  </head>
 
-                <p> chart should be below</p>
-                <canvas id="chart" width="600" height="400"></canvas>
+  <body>
+
+     <h1> Spotify Analytics </h1>
+
+    <p> Compare the change in your listenting habits over time. Use the slide bars to compare how the audio features in your Top 50 songs compare over time.</p>
+
+    <div class="aspectwrapper">
+      <div class = "content">
+        <div id="feat">
+          <div class="left" id ="left">
+              <h2>Accousticness</h2>
+              <input id="ac_slide" type="range" min="1" max="3" step="1" value="1" onchange="update_ac_slider(this.value)">
+            </div>
+          <div class="right" id = "right">
+            <canvas id="ac_chart" width="600" height="400"></canvas>
+          </div>
+        </div>
+        <div id="feat">
+          <div class="left" id ="left">
+              <h2>Energy</h2>
+              <input id="en_slide" type="range" min="1" max="3" step="1" value="1" onchange="update_en_slider(this.value)">
+            </div>
+          <div class="right" id = "right">
+            <canvas id="en_chart" width="600" height="400"></canvas>
+          </div>
+        </div>
 
 
-                  <script type="text/javascript">
+    <script type="text/javascript">
+        //<canvas id="chart" width="600" height="400"></canvas>
 
-                    // bar chart data
-                  var data = {{ values|safe }};
+      // bar chart data
+      var short_ac = {{ short_ac|safe }}; 
+      var med_ac = {{ med_ac|safe }}; 
 
-                    var barData = {  
-                      labels : ["0", "0.2", "0.4", "0.6", "0.8", "1.0",],
-                      datasets : [{
-                        fillColor: "rgba(151,187,205,0.2)",
-                        strokeColor: "rgba(151,187,205,1)",
-                        pointColor: "rgba(151,187,205,1)",
-                        barPercentage:1.0,
-                        data
-                        }
-                      ]
-                      }
-                    
-                    
+      var short_en = {{ short_en|safe }}; 
+      var med_en = {{ med_en|safe }}; 
+      
+      //default to ac short term ac graph
+      short_ac_data = create_graph_data(short_ac) 
+      var short_ac_chart = document.getElementById("ac_chart").getContext("2d"); 
+      create_chart(short_ac_chart, short_ac_data)
 
-                   // get bar chart canvas
-                   var mychart = document.getElementById("chart").getContext("2d");
+      //default to en short term graph
+      short_en_data = create_graph_data(short_en) 
+      var short_en_chart = document.getElementById("en_chart").getContext("2d"); 
+      create_chart(short_en_chart, short_en_data)      
 
-                  steps = 5
-                  max = 25
-              
-                   // draw bar chart
-                   new Chart(mychart).Bar(barData, {
-                     scaleOverride: true,
-                     scaleSteps: steps,
-                     scaleStepWidth: Math.ceil(max / steps),
-                     scaleStartValue: 0,
-                     scaleShowVerticalLines: false,
-                     scaleShowGridLines : false,
-                     barShowStroke : true,
-                     scaleShowLabels: true,
-                     scaleOverride : true,
-                     }
-                   );
+      function update_ac_slider(slideAmount) {
+            if (slideAmount == 1){
+              short_ac_data = create_graph_data(short_ac)
+              var short_ac_chart = document.getElementById("ac_chart").getContext("2d");
+              create_chart(short_ac_chart, short_ac_data)
+            }
+            else {
+              med_ac_data = create_graph_data(med_ac)
+              var med_ac_chart = document.getElementById("ac_chart").getContext("2d");
+              create_chart(med_ac_chart, med_ac_data)
+            }
+        }
+        function update_en_slider(slideAmount) {
+            if (slideAmount == 1){
+              short_en_data = create_graph_data(short_en)
+              var short_en_chart = document.getElementById("en_chart").getContext("2d");
+              create_chart(short_en_chart, short_en_data)
+            }
+            else {
+              med_en_data = create_graph_data(med_en)
+              var med_en_chart = document.getElementById("en_chart").getContext("2d");
+              create_chart(med_en_chart, med_en_data)
+            }
+        }
+      function create_graph_data(graph_data){
+        var barData = {  
+          labels : ["0", "0.2", "0.4", "0.6", "0.8", "1.0",],
+          datasets : [{
+            fillColor: "rgba(97,179,41,0.2)",
+            strokeColor: "rgba(74,112,35,1)",
+            pointColor: "rgba(151,187,205,1)", //not sure if this is used
+            barPercentage:1.0,
+            data: graph_data
+            }
+          ]
+          }
+          return barData
+        }
+      
+      function create_chart(which_chart, which_bar){
+        steps = 5
+        max = 25
+  
+        // draw bar chart
+        new Chart(which_chart).Bar(which_bar, {
+          scaleOverride: true,
+          scaleSteps: steps,
+          scaleStepWidth: Math.ceil(max / steps),
+          scaleStartValue: 0,
+          scaleShowVerticalLines: false,
+          scaleShowGridLines : false,
+          barShowStroke : true,
+          scaleShowLabels: true,
+          scaleOverride : true,
+          }
+        );
+      }
 
-                  </script>
-              </body>
+          </script>
+
+
+    </body>
         
 </html>
-  
- 
