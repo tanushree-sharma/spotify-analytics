@@ -7,8 +7,27 @@
     </head>
 
     <body>
+        <div class="loader-wrapper">
+            <div class="loading">
+              <div class="dot" style="height:1.5em; left:90vh; top:60vh"></div>
+              <div class="dot" style="height:4em; left:100vh; top:54vh"></div>
+              <div class="dot" style="height:6em; left:110vh; top:48vh"></div>
+              <div class="dot" style="height:4em; left:120vh; top:54vh"></div>
+              <div class="dot" style="height:2em; left:130vh; top:60vh"></div>
+              <div class="dot" style="height:4em; left:140vh; top:54vh"></div>
+              <div class="dot" style="height:6em; left:150vh; top:48vh"></div>
+              <div class="dot" style="height:2em; left:160vh; top:60vh"></div>
+              </div>
+            </div>
+              
+              <script>
+                $(window).on("load",function(){
+                  $(".loader-wrapper").fadeOut("slow");
+                });
+              </script>
+
         <h1>Spotify analytics</h1>
-        <a href="/login" class="button">Sign In With Your Spotify Account</a>
+        <p id="submit"> <a href="/login" class="button">Sign In With Your Spotify Account</a></p>
     </body>
     </html>
 
