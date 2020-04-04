@@ -49,7 +49,6 @@ def auth():
     auth_url = "{}/?{}".format("https://accounts.spotify.com/authorize", url_args)
     return redirect(auth_url)
 
-# NEW COMMENT @app.route("/get_top_tracks", methods=['GET','POST'])
 def get_top_tracks(time_range):
 
     top_track_endpoint  = "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range={}".format(time_range)
@@ -61,37 +60,44 @@ def get_top_tracks(time_range):
     display_arr = [profile_data][0]['items']
     for each_track in display_arr:
         tracks.append([each_track][0]['id'])
-    print("inside get top tracks")
 
     return tracks #return the id of the top 50 tracks
 
 def get_feature_data(track_ids):
     accousticness = []
+    danceability = []
     energy = []
     tempo = []
     valence = []
 
-    for track in track_ids:
-        feat_endpoint  = "https://api.spotify.com/v1/audio-features/{}".format(track)
-        song_response = requests.get(feat_endpoint, headers=AUTHORIZATION_HEADER)
-        song_data = json.loads(song_response.text)
-        song_ac = song_data['acousticness']
-        accousticness.append(song_ac)
-        song_en = song_data['energy']
-        energy.append(song_en)
-        song_te = song_data['tempo']
-        tempo.append(song_te)
-        song_va = song_data['valence']
-        valence.append(song_va)
+
+    try: 
+        for track in track_ids:
+            feat_endpoint  = "https://api.spotify.com/v1/audio-features/{}".format(track)
+            song_response = requests.get(feat_endpoint, headers=AUTHORIZATION_HEADER)
+            song_data = json.loads(song_response.text)
+            song_ac = song_data['acousticness']
+            accousticness.append(song_ac)
+            song_da= song_data['danceability']
+            danceability.append(song_da)
+            song_en = song_data['energy']
+            energy.append(song_en)
+            song_te = song_data['tempo']
+            tempo.append(song_te)
+            song_va = song_data['valence']
+            valence.append(song_va)
+        
+    except:
+        print("Error occured with getting song data")
 
     # bin data to create hisogram
     ac_bins = binned_statistic(accousticness, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+    da_bins = binned_statistic(danceability, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
     en_bins = binned_statistic(energy, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
-    te_bins = binned_statistic(tempo, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
+    te_bins = binned_statistic(tempo, np.arange(50), statistic='count', bins=6, range=(50, 200))[0] #tempo ranges from 50-200BPM
     va_bins = binned_statistic(valence, np.arange(50), statistic='count', bins=6, range=(0, 1))[0]
 
-    print((ac_bins.astype(int)).tolist())
-    return ((ac_bins.astype(int)).tolist(), (en_bins.astype(int)).tolist(), (te_bins.astype(int)).tolist(), (va_bins.astype(int)).tolist())
+    return ((ac_bins.astype(int)).tolist(), (da_bins.astype(int)).tolist(), (en_bins.astype(int)).tolist(), (te_bins.astype(int)).tolist(), (va_bins.astype(int)).tolist())
 
 
 @app.route("/callback/q", methods=['GET','POST']) 
@@ -118,16 +124,20 @@ def callback():
     global AUTHORIZATION_HEADER    # Needed to modify global copy of globvar
     AUTHORIZATION_HEADER  = {"Authorization": "Bearer {}".format(access_token)}
 
-    short_top = get_top_tracks("short_term") #ids of top 50 tracks
+    #ids of top 50 tracks
+    short_top = get_top_tracks("short_term") 
     med_top = get_top_tracks("medium_term")
+    long_top = get_top_tracks("long_term")
 
+    short_ac, short_da, short_en, short_te, short_va= get_feature_data(short_top)
+    med_ac, med_da, med_en, med_te, med_va= get_feature_data(med_top)
+    long_ac, long_da, long_en, long_te, long_va= get_feature_data(long_top)
 
-    short_ac, short_en, short_te, short_va= get_feature_data(short_top)
-    med_ac, med_en, med_te, med_va= get_feature_data(med_top)
- 
-
-    return render_template("auth_return.html", short_ac=json.dumps(short_ac), med_ac=json.dumps(med_ac), short_en=json.dumps(short_en), med_en=json.dumps(med_en))
-
+    return render_template("auth_return.html", short_ac=json.dumps(short_ac), med_ac=json.dumps(med_ac), long_ac=json.dumps(long_ac),
+                           short_da=json.dumps(short_da), med_da=json.dumps(med_da), long_da=json.dumps(long_da),
+                           short_en=json.dumps(short_en), med_en=json.dumps(med_en), long_en=json.dumps(long_en),
+                           short_te=json.dumps(short_te), med_te=json.dumps(med_te), long_te=json.dumps(long_te),
+                           short_va=json.dumps(short_va), med_va=json.dumps(med_va), long_va=json.dumps(long_va))
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)

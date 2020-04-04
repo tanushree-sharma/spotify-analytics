@@ -7,6 +7,11 @@
     </head>
 
     <body>
+      <div class = "header_container">
+        <img src="{{ url_for('static',filename='styles/bkg_logo.png') }}" alt="logo" style="width:30%;">
+        <div class="head-text"><h1> SPOTIFY USER ANALYTICS </h1></div>
+      </div>
+
         <div class="loader-wrapper">
             <div class="loading">
               <div class="dot" style="height:1.5em; left:90vh; top:60vh"></div>
@@ -26,7 +31,6 @@
                 });
               </script>
 
-        <h1>Spotify analytics</h1>
         <p id="submit"> <a href="/login" class="button">Sign In With Your Spotify Account</a></p>
     </body>
     </html>
