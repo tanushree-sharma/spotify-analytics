@@ -5,6 +5,8 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <link rel="stylesheet" type="text/css"href="{{ url_for('static',filename='styles/auth_return.css') }}">
+    <link rel="icon" type="image/ico" href="{{ url_for('static',filename='styles/logo_transparent.png') }}" />
+    <title>Spotify User Analytics</title>
 
   </head>
 
@@ -14,7 +16,28 @@
       <div class="head-text"><h1> SPOTIFY USER ANALYTICS </h1></div>
       </div>
 
-      <p id="description"> Use the slide bars to compare how the audio features in your top 50 tracks compare over different time spans. The left side represent short-term time range (last 4 weeks), middle is medium-term (last 6 months) and right side is long-term (several years). </p>
+      <p id="description"> View your top 50 tracks over different time spans below. The short-term time range is the last 4 weeks, medium-term is the last 6 months and long-term represents the last several years of listening history. </p>
+      
+      <div class = "flex-container">
+        <div class="scroll">
+            <table class = "top_tracks "id="top_short">
+                <tr><th style="font-family:Oswald;font-size: 1.4vw;">TOP 50 SHORT-TERM TRACKS</th></tr>
+            </table>
+          </div>
+          <div class="scroll">
+            <table class = "top_tracks "id="top_med">
+                <tr><th style="font-family:Oswald;font-size: 1.4vw;">TOP 50 MEDIUM-TERM TRACKS</th></tr>
+            </table>
+          </div>
+          <div class="scroll">
+            <table class = "top_tracks "id="top_long">
+                <tr><th style="font-family:Oswald;font-size: 1.4vw;">TOP 50 LONG-TERM TRACKS</th></tr>
+            </table>
+          </div>
+      </div>
+
+    <p id="description"> Use the slide bars to compare how the audio features in your top 50 tracks compare over different time spans. The left side represent short-term time range, middle is medium-term and right side is long-term. </p>
+
 
     <div class="aspectwrapper">
       <div class = "content">
@@ -66,9 +89,45 @@
               </div>
         </div>
 
-
     <script type="text/javascript">
         //<canvas id="chart" width="600" height="400"></canvas>
+      
+      var short_top_names = {{ short_top_names|safe }}
+      var med_top_names = {{ med_top_names|safe }}
+      var long_top_names = {{ long_top_names|safe }}
+
+      table_top_short = document.getElementById("top_short");
+
+      for(var i = 0; i < short_top_names.length; i++) {
+               // create a new row
+               var newRow = table_top_short.insertRow(table_top_short.length);
+                   // create a new cell
+                   var cell = newRow.insertCell(short_top_names[i]);
+                   // add value to the cell
+                   cell.innerHTML = short_top_names[i];
+           }
+        
+        table_top_med= document.getElementById("top_med");
+
+        for(var i = 0; i < med_top_names.length; i++) {
+         // create a new row
+         var newRow = table_top_med.insertRow(table_top_med.length);
+             // create a new cell
+             var cell = newRow.insertCell(med_top_names[i]);
+             // add value to the cell
+             cell.innerHTML = med_top_names[i];
+     }
+
+     table_top_long= document.getElementById("top_long");
+
+    for(var i = 0; i < long_top_names.length; i++) {
+    // create a new row
+    var newRow = table_top_long.insertRow(table_top_long.length);
+        // create a new cell
+        var cell = newRow.insertCell(long_top_names[i]);
+        // add value to the cell
+        cell.innerHTML = long_top_names[i];
+    }
 
       // bar chart data
       var short_ac = {{ short_ac|safe }}; 
@@ -241,10 +300,6 @@
           }
         );
       }
-
           </script>
-
-
     </body>
-        
 </html>

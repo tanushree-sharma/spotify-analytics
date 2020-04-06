@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy.stats import binned_statistic
+from pprint import pprint 
 
 
 AUTHORIZATION_HEADER = ""
@@ -55,13 +56,17 @@ def get_top_tracks(time_range):
     profile_response = requests.get(top_track_endpoint, headers=AUTHORIZATION_HEADER)
     profile_data = json.loads(profile_response.text)
   
-    tracks = []
+    track_ids = []
+    track_names = []
 
     display_arr = [profile_data][0]['items']
     for each_track in display_arr:
-        tracks.append([each_track][0]['id'])
+        # get track and artist
+        track_names.append([each_track][0]['name'] + " by " + [each_track][0]['album']['artists'][0]['name'])
+        # get song id
+        track_ids.append([each_track][0]['id'])
 
-    return tracks #return the id of the top 50 tracks
+    return (track_ids, track_names)
 
 def get_feature_data(track_ids):
     accousticness = []
@@ -69,7 +74,6 @@ def get_feature_data(track_ids):
     energy = []
     tempo = []
     valence = []
-
 
     try: 
         for track in track_ids:
@@ -124,20 +128,21 @@ def callback():
     global AUTHORIZATION_HEADER    # Needed to modify global copy of globvar
     AUTHORIZATION_HEADER  = {"Authorization": "Bearer {}".format(access_token)}
 
-    #ids of top 50 tracks
-    short_top = get_top_tracks("short_term") 
-    med_top = get_top_tracks("medium_term")
-    long_top = get_top_tracks("long_term")
+    #ids and name/artist of top 50 tracks
+    short_top_ids, short_top_names = get_top_tracks("short_term") 
+    med_top_ids, med_top_names = get_top_tracks("medium_term")
+    long_top_ids, long_top_names = get_top_tracks("long_term")
 
-    short_ac, short_da, short_en, short_te, short_va= get_feature_data(short_top)
-    med_ac, med_da, med_en, med_te, med_va= get_feature_data(med_top)
-    long_ac, long_da, long_en, long_te, long_va= get_feature_data(long_top)
+    short_ac, short_da, short_en, short_te, short_va= get_feature_data(short_top_ids)
+    med_ac, med_da, med_en, med_te, med_va= get_feature_data(med_top_ids)
+    long_ac, long_da, long_en, long_te, long_va= get_feature_data(long_top_ids)
 
     return render_template("auth_return.html", short_ac=json.dumps(short_ac), med_ac=json.dumps(med_ac), long_ac=json.dumps(long_ac),
                            short_da=json.dumps(short_da), med_da=json.dumps(med_da), long_da=json.dumps(long_da),
                            short_en=json.dumps(short_en), med_en=json.dumps(med_en), long_en=json.dumps(long_en),
                            short_te=json.dumps(short_te), med_te=json.dumps(med_te), long_te=json.dumps(long_te),
-                           short_va=json.dumps(short_va), med_va=json.dumps(med_va), long_va=json.dumps(long_va))
-
+                           short_va=json.dumps(short_va), med_va=json.dumps(med_va), long_va=json.dumps(long_va),
+                           short_top_names=json.dumps(short_top_names), med_top_names=json.dumps(med_top_names), long_top_names=json.dumps(long_top_names))
+    
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
