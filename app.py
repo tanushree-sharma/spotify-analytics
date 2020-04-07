@@ -22,7 +22,7 @@ CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 SHOW_DIALOG_bool = True
 SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 
-REDIRECT_URI = "https://sp-analytics-testing.herokuapp.com/callback/q"
+REDIRECT_URI = "https://spotify-user-analytics.herokuapp.com/callback/q" 
 #REDIRECT_URI = "http://127.0.0.1:5000/callback/q"
 
 auth_query_parameters = {
