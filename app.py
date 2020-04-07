@@ -3,9 +3,6 @@ import os
 from flask import Flask, render_template, redirect, g, request
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-import spotipy.util as util
-import os
-import sys
 import json
 import requests
 from urllib.parse import quote
@@ -13,22 +10,20 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy.stats import binned_statistic
-from pprint import pprint 
 
 
 AUTHORIZATION_HEADER = ""
 #  Client Keys
 CLIENT_ID = "3decd3b13fee4dc3828c56b24136abcb"
-CLIENT_SECRET = "5fe9f9cdb12f471d8a7e73cd58aea97f"
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
 
 # Server-side Parameters
 SHOW_DIALOG_bool = True
 SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 
-REDIRECT_URI = "https://sp-analytics-testing.herokuapp.com/callback/q"
-#REDIRECT_URI = "http://127.0.0.1:5000/callback/q"
-
+#REDIRECT_URI = "https://sp-analytics-testing.herokuapp.com/callback/q"
+REDIRECT_URI = "http://127.0.0.1:5000/callback/q"
 
 auth_query_parameters = {
     "response_type": "code",
@@ -45,7 +40,7 @@ def index():
 
 @app.route("/login")
 def auth():
-    # Auth Step 1: Authorization
+
     url_args = "&".join(["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()])
     auth_url = "{}/?{}".format("https://accounts.spotify.com/authorize", url_args)
     return redirect(auth_url)
@@ -106,7 +101,6 @@ def get_feature_data(track_ids):
 
 @app.route("/callback/q", methods=['GET','POST']) 
 def callback():
-    # Auth Step 4: Requests refresh and access tokens
     auth_token = request.args['code']
     code_payload = {
         "grant_type": "authorization_code",
@@ -117,14 +111,12 @@ def callback():
     }
     post_request = requests.post("https://accounts.spotify.com/api/token", data=code_payload)
 
-    # Auth Step 5: Tokens are Returned to Application
     response_data = json.loads(post_request.text)
     access_token = response_data["access_token"]
     refresh_token = response_data["refresh_token"]
     token_type = response_data["token_type"]
     expires_in = response_data["expires_in"]
 
-    # Auth Step 6: Use the access token to access Spotify API
     global AUTHORIZATION_HEADER    # Needed to modify global copy of globvar
     AUTHORIZATION_HEADER  = {"Authorization": "Bearer {}".format(access_token)}
 
@@ -135,7 +127,9 @@ def callback():
 
     short_ac, short_da, short_en, short_te, short_va= get_feature_data(short_top_ids)
     med_ac, med_da, med_en, med_te, med_va= get_feature_data(med_top_ids)
+    print(med_ac, med_da, med_en, med_te, med_va)
     long_ac, long_da, long_en, long_te, long_va= get_feature_data(long_top_ids)
+    print(long_ac, long_da, long_en, long_te, long_va)
 
     return render_template("auth_return.html", short_ac=json.dumps(short_ac), med_ac=json.dumps(med_ac), long_ac=json.dumps(long_ac),
                            short_da=json.dumps(short_da), med_da=json.dumps(med_da), long_da=json.dumps(long_da),
