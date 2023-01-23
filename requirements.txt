@@ -67,7 +67,7 @@ seaborn==0.10.0
 selenium==3.8.0
 Send2Trash==1.5.0
 six==1.14.0
-spotipy==2.10.0
+spotipy==2.22.1
 terminado==0.8.3
 testpath==0.4.4
 tornado==6.0.4
